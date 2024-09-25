@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line Drawing Algorithms</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Algoritmos de Desenho de Retas</h1>
+    
+    <label for="x1">x1: </label><input type="number" id="x1" value="50">
+    <label for="y1">y1: </label><input type="number" id="y1" value="50">
+    <label for="x2">x2: </label><input type="number" id="x2" value="300">
+    <label for="y2">y2: </label><input type="number" id="y2" value="300">
+
+    <br><br>
+
+    <label for="algorithm">Escolha o Algoritmo: </label>
+    <select id="algorithm">
+        <option value="analitico">Analítico</option>
+        <option value="dda">DDA</option>
+        <option value="bresenham">Bresenham</option>
+    </select>
+
+    <br><br>
+
+    <button onclick="drawLine()">Desenhar Linha</button>
+
+    <br><br>
+
+    <canvas id="canvas" width="800" height="800"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function putPixel(x, y, lineWidth) {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(x, y, lineWidth, lineWidth);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawLine() {
+            const x1 = parseInt(document.getElementById('x1').value);
+            const y1 = parseInt(document.getElementById('y1').value);
+            const x2 = parseInt(document.getElementById('x2').value);
+            const y2 = parseInt(document.getElementById('y2').value);
+            const algorithm = document.getElementById('algorithm').value;
+
+            const lineWidth = 3;  // Define a espessura da linha
+
+            clearCanvas();
+
+            if (algorithm === 'analitico') {
+                drawAnalitico(x1, y1, x2, y2, lineWidth);
+            } else if (algorithm === 'dda') {
+                drawDDA(x1, y1, x2, y2, lineWidth);
+            } else if (algorithm === 'bresenham') {
+                drawBresenham(x1, y1, x2, y2, lineWidth);
+            }
+        }
+
+        // Algoritmo Analítico
+        function drawAnalitico(x1, y1, x2, y2, lineWidth) {
+            const m = (y2 - y1) / (x2 - x1);
+            const b = y1 - m * x1;
+
+            for (let x = x1; x <= x2; x++) {
+                const y = m * x + b;
+                putPixel(x, Math.round(y), lineWidth);
+            }
+        }
+
+        // Algoritmo DDA
+        function drawDDA(x1, y1, x2, y2, lineWidth) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const steps = Math.abs(dx) > Math.abs(dy) ? Math.abs(dx) : Math.abs(dy);
+
+            const Xinc = dx / steps;
+            const Yinc = dy / steps;
+
+            let x = x1;
+            let y = y1;
+
+            for (let i = 0; i <= steps; i++) {
+                putPixel(Math.round(x), Math.round(y), lineWidth);
+                x += Xinc;
+                y += Yinc;
+            }
+        }
+
+        // Algoritmo de Bresenham
+        function drawBresenham(x1, y1, x2, y2, lineWidth) {
+            let dx = Math.abs(x2 - x1);
+            let dy = Math.abs(y2 - y1);
+            let sx = (x1 < x2) ? 1 : -1;
+            let sy = (y1 < y2) ? 1 : -1;
+            let err = dx - dy;
+
+            while (true) {
+                putPixel(x1, y1, lineWidth);
+
+                if (x1 === x2 && y1 === y2) break;
+                let e2 = 2 * err;
+                if (e2 > -dy) { err -= dy; x1 += sx; }
+                if (e2 < dx) { err += dx; y1 += sy; }
+            }
+        }
+    </script>
+
+</body>
+</html>
+
