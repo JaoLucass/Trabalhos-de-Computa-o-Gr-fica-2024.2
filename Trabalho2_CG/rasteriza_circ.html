@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle Drawing Algorithms with Grid</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Algoritmos de Desenho de Circunferências com Grade</h1>
+    
+    <label for="xc">Centro x: </label><input type="number" id="xc" value="200">
+    <label for="yc">Centro y: </label><input type="number" id="yc" value="200">
+    <label for="radius">Raio: </label><input type="number" id="radius" value="100">
+
+    <br><br>
+
+    <label for="algorithm">Escolha o Algoritmo: </label>
+    <select id="algorithm">
+        <option value="parametric">Equação Paramétrica</option>
+        <option value="symmetry">Incremental com Simetria</option>
+        <option value="bresenham">Bresenham</option>
+    </select>
+
+    <br><br>
+
+    <button onclick="drawCircle()">Desenhar Circunferência</button>
+
+    <br><br>
+
+    <canvas id="canvas" width="800" height="800"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;  // Tamanho da grade
+
+        // Função para desenhar a grade no fundo
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  // Limpa o canvas
+            ctx.strokeStyle = "#ddd";  // Cor da grade
+
+            // Desenhar linhas verticais e horizontais
+            for (let x = 0; x <= canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            for (let y = 0; y <= canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        // Função para desenhar um pixel grande (circunferência com espessura)
+        function putPixel(x, y, lineWidth, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x * gridSize, y * gridSize, lineWidth, lineWidth);  // Coloca o pixel de acordo com a grade
+        }
+
+        // Função para limpar o canvas e redesenhar a grade
+        function clearCanvas() {
+            drawGrid();
+        }
+
+        // Algoritmo Paramétrico
+        function drawCircleParametric(xc, yc, radius, color) {
+            for (let t = 0; t <= 360; t++) {
+                let angle = t * (Math.PI / 180); // Converter graus para radianos
+                let x = Math.round(xc + radius * Math.cos(angle));
+                let y = Math.round(yc + radius * Math.sin(angle));
+                putPixel(x, y, gridSize, color); // Desenhar o pixel
+            }
+        }
+
+        // Algoritmo Incremental com Simetria
+        function drawCircleSymmetry(xc, yc, radius, color) {
+            let angleIncrement = 1 / radius;
+            for (let theta = 0; theta <= Math.PI / 4; theta += angleIncrement) {
+                let x = Math.round(radius * Math.cos(theta));
+                let y = Math.round(radius * Math.sin(theta));
+
+                // Desenhar os 8 pontos simétricos
+                putPixel(xc + x, yc + y, gridSize, color);
+                putPixel(xc - x, yc + y, gridSize, color);
+                putPixel(xc + x, yc - y, gridSize, color);
+                putPixel(xc - x, yc - y, gridSize, color);
+                putPixel(xc + y, yc + x, gridSize, color);
+                putPixel(xc - y, yc + x, gridSize, color);
+                putPixel(xc + y, yc - x, gridSize, color);
+                putPixel(xc - y, yc - x, gridSize, color);
+            }
+        }
+
+        // Algoritmo de Bresenham
+        function drawCircleBresenham(xc, yc, radius, color) {
+            let x = 0;
+            let y = radius;
+            let d = 3 - 2 * radius;
+
+            while (x <= y) {
+                // Desenhar os 8 pontos simétricos
+                putPixel(xc + x, yc + y, gridSize, color);
+                putPixel(xc - x, yc + y, gridSize, color);
+                putPixel(xc + x, yc - y, gridSize, color);
+                putPixel(xc - x, yc - y, gridSize, color);
+                putPixel(xc + y, yc + x, gridSize, color);
+                putPixel(xc - y, yc + x, gridSize, color);
+                putPixel(xc + y, yc - x, gridSize, color);
+                putPixel(xc - y, yc - x, gridSize, color);
+
+                x++;
+                if (d < 0) {
+                    d = d + 4 * x + 6;
+                } else {
+                    y--;
+                    d = d + 4 * (x - y) + 10;
+                }
+            }
+        }
+
+        // Função para desenhar a circunferência com base no algoritmo selecionado
+        function drawCircle() {
+            const xc = Math.floor(document.getElementById('xc').value / gridSize);
+            const yc = Math.floor(document.getElementById('yc').value / gridSize);
+            const radius = Math.floor(document.getElementById('radius').value / gridSize);
+            const algorithm = document.getElementById('algorithm').value;
+
+            const color = (algorithm === 'parametric') ? 'red' : (algorithm === 'symmetry') ? 'green' : 'blue';
+
+            clearCanvas();
+
+            if (algorithm === 'parametric') {
+                drawCircleParametric(xc, yc, radius, color);
+            } else if (algorithm === 'symmetry') {
+                drawCircleSymmetry(xc, yc, radius, color);
+            } else if (algorithm === 'bresenham') {
+                drawCircleBresenham(xc, yc, radius, color);
+            }
+        }
+
+        // Desenhar a grade no início
+        drawGrid();
+    </script>
+
+</body>
+</html>
